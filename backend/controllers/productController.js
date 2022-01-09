@@ -1,10 +1,11 @@
 const Product = require("../models/productModel");
-const ErrorHander = require("../utils/errorhandler");
+const ErrorHandler = require("../utils/errorhandler");
 const catchAsyncError = require("../middleware/catchAsyncError");
 const ApiFeatures = require("../utils/apiFeatures");
 
 //Create Product - Admin
 exports.createProduct = catchAsyncError(async (req, res, next) => {
+  req.body.user = req.user.id;
   const product = await Product.create(req.body);
   res.status(201).json({
     success: true,
@@ -12,29 +13,35 @@ exports.createProduct = catchAsyncError(async (req, res, next) => {
   });
 });
 
-//Get Product List
-exports.getAllProducts = catchAsyncError(async (req, res) => {
-  const resultPerPage = 2;
+// Get All Product
+exports.getAllProducts = catchAsyncError(async (req, res, next) => {
+  const resultPerPage = 8;
   const productsCount = await Product.countDocuments();
-  console.log(productsCount);
-  const apiFeatures = new ApiFeatures(Product.find(), req.query)
+
+  const apiFeature = new ApiFeatures(Product.find(), req.query)
     .search()
-    .filter()
-    .pagination(resultPerPage);
-  const products = await apiFeatures.query;
+    .filter();
+
+  let products = await apiFeature.query;
+
+  let filteredProductsCount = products.length;
+
   res.status(200).json({
     success: true,
     products,
-    productsCount
+    productsCount,
+    resultPerPage,
+    filteredProductsCount,
   });
 });
+
 
 //Update product -- Admin
 exports.updateProduct = catchAsyncError(async (req, res, next) => {
   let product = await Product.findById(req.params.id);
 
   if (!product) {
-    return next(new ErrorHander("Product Not Found", 404));
+    return next(new ErrorHandler("Product Not Found", 404));
   }
 
   product = await Product.findByIdAndUpdate(req.params.id, req.body, {
@@ -53,7 +60,7 @@ exports.deleteProduct = catchAsyncError(async (req, res, next) => {
   const product = await Product.findById(req.params.id);
 
   if (!product) {
-    return next(new ErrorHander("Product Not Found", 404));
+    return next(new ErrorHandler("Product Not Found", 404));
   }
 
   product.remove();
@@ -69,11 +76,80 @@ exports.getProductDetails = catchAsyncError(async (req, res, next) => {
   const product = await Product.findById(req.params.id);
 
   if (!product) {
-    return next(new ErrorHander("Product Not Found", 404));
+    return next(new ErrorHandler("Product Not Found", 404));
   }
 
   res.status(200).json({
     success: true,
     product,
+  });
+});
+
+// Update Product -- Admin
+
+exports.updateProduct = catchAsyncError(async (req, res, next) => {
+  let product = await Product.findById(req.params.id);
+
+  if (!product) {
+    return next(new ErrorHandler("Product not found", 404));
+  }
+
+  // Images Start Here
+  let images = [];
+
+  if (typeof req.body.images === "string") {
+    images.push(req.body.images);
+  } else {
+    images = req.body.images;
+  }
+
+  if (images !== undefined) {
+    // Deleting Images From Cloudinary
+    for (let i = 0; i < product.images.length; i++) {
+      await cloudinary.v2.uploader.destroy(product.images[i].public_id);
+    }
+
+    const imagesLinks = [];
+
+    for (let i = 0; i < images.length; i++) {
+      const result = await cloudinary.v2.uploader.upload(images[i], {
+        folder: "products",
+      });
+
+      imagesLinks.push({
+        public_id: result.public_id,
+        url: result.secure_url,
+      });
+    }
+
+    req.body.images = imagesLinks;
+  }
+
+  product = await Product.findByIdAndUpdate(req.params.id, req.body, {
+    new: true,
+    runValidators: true,
+    useFindAndModify: false,
+  });
+
+  res.status(200).json({
+    success: true,
+    product,
+  });
+});
+
+// Delete Product
+
+exports.deleteProduct = catchAsyncError(async (req, res, next) => {
+  const product = await Product.findById(req.params.id);
+
+  if (!product) {
+    return next(new ErrorHandler("Product not found", 404));
+  }
+
+  await product.remove();
+
+  res.status(200).json({
+    success: true,
+    message: "Product Delete Successfully",
   });
 });
