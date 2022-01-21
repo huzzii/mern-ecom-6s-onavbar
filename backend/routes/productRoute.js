@@ -17,7 +17,7 @@ router.route("/products").get(getAllProducts);
 
 router
   .route("/admin/product/new")
-  .post(isAuthenticatedUser, authorizeRoles("user"), createProduct);
+  .post(isAuthenticatedUser, authorizeRoles("admin"), createProduct);
 
 router.route("/review").put(isAuthenticatedUser, createProductReview);
 router.route("/reviews").get(getProductReview).delete(isAuthenticatedUser, deleteProductReview);

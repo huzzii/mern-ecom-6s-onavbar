@@ -8,12 +8,12 @@ const Footer = () => {
         <footer id='footer'>
             <div className="leftFooter">
                 <h4>DOWNLOAD OUR APP</h4>
-                <p>Download app for ios and android mobile phone</p>
+                {/* <p>Download app for ios and android mobile phone</p> */}
                 <img src={playStore} alt="PlayStore" />
                 <img src={appStore} alt="AppStore" />
             </div>
             <div className="midFooter">
-                <h1>MERN ECOMMERCE</h1>
+                <h1>MERN ECOM</h1>
                 <p>High Quality is our first priority</p>
                 <p>Made With ❤ By Huzaif Shaikh</p>
             </div>
