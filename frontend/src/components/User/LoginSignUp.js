@@ -22,6 +22,9 @@ const LoginSignUp = ({ history }) => {
   const registerTab = useRef(null);
   const switcherTab = useRef(null);
 
+  const [loginEmail, setLoginEmail] = useState("");
+  const [loginPassword, setLoginPassword] = useState("");
+
   const loginSubmit = (e) => {
     e.preventDefault();
     dispatch(login(loginEmail, loginPassword));
@@ -45,7 +48,6 @@ const LoginSignUp = ({ history }) => {
     const myForm = new FormData();
     myForm.set("name", name);
     myForm.set("email", email);
-    myForm.set("password", password);
     myForm.set("avatar", avatar);
     dispatch(register(myForm));
   };
@@ -66,9 +68,6 @@ const LoginSignUp = ({ history }) => {
       setUser({ ...user, [e.target.name]: e.target.value });
     }
   };
-
-  const [loginEmail, setLoginEmail] = useState("");
-  const [loginPassword, setLoginPassword] = useState("");
 
   useEffect(() => {
     if (error) {
