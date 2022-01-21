@@ -11,7 +11,7 @@ exports.registerUser = catchAsyncError(async (req, res, next) => {
   const myCloud = await cloudinary.v2.uploader.upload(req.body.avatar, {
     folder: "avatars",
     width: 150,
-    crop: "scale"
+    crop: "scale",
   });
 
   const { name, email, password } = req.body;
@@ -176,15 +176,33 @@ exports.updateProfile = catchAsyncError(async (req, res, next) => {
     email: req.body.email,
   };
 
+  if (req.body.avatar !== "") {
+    const user = await User.findById(req.user.id);
+
+    const imageId = user.avatar.public_id;
+
+    await cloudinary.v2.uploader.destroy(imageId);
+
+    const myCloud = await cloudinary.v2.uploader.upload(req.body.avatar, {
+      folder: "avatars",
+      width: 150,
+      crop: "scale",
+    });
+
+    newUserData.avatar = {
+      public_id: myCloud.public_id,
+      url: myCloud.secure_url,
+    };
+  }
+
   const user = await User.findByIdAndUpdate(req.user.id, newUserData, {
     new: true,
-    runValidators: false,
+    runValidators: true,
     useFindAndModify: false,
   });
 
   res.status(200).json({
     success: true,
-    user,
   });
 });
 
@@ -193,9 +211,9 @@ exports.getAllUser = catchAsyncError(async (req, res, next) => {
   const users = await User.find();
 
   res.status(200).json({
-    success:true,
-    users
-  })
+    success: true,
+    users,
+  });
 });
 
 //Get Single User -- Admin
@@ -203,13 +221,15 @@ exports.getSingleUser = catchAsyncError(async (req, res, next) => {
   const user = await User.findById(req.params.id);
 
   if (!user) {
-    return next(new ErrorHandler(`User DOesnt exist with id: ${req.params.id}`, 404));
+    return next(
+      new ErrorHandler(`User DOesnt exist with id: ${req.params.id}`, 404)
+    );
   }
 
   res.status(200).json({
-    success:true,
-    user
-  })
+    success: true,
+    user,
+  });
 });
 
 //Update User Role -- ADMIN
@@ -217,7 +237,7 @@ exports.updateUserRole = catchAsyncError(async (req, res, next) => {
   const newUserData = {
     name: req.body.name,
     email: req.body.email,
-    role: req.body.role
+    role: req.body.role,
   };
 
   const user = await User.findByIdAndUpdate(req.params.id, newUserData, {
@@ -234,14 +254,13 @@ exports.updateUserRole = catchAsyncError(async (req, res, next) => {
 
 //Delete User  --Admin
 exports.deleteUser = catchAsyncError(async (req, res, next) => {
-
   const user = User.findById(req.params.id);
 
   if (!user) {
     return next(new ErrorHandler("User Doesnt Exist", 404));
   }
   await user.remove();
-  
+
   res.status(200).json({
     success: true,
     message: "User Deleted Successfully",
