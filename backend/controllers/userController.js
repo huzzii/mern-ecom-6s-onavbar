@@ -80,9 +80,7 @@ exports.forgotPassword = catchAsyncError(async (req, res, next) => {
 
   await user.save({ validateBeforeSave: false });
 
-  const resetPasswordUrl = `${req.protocol}://${req.get(
-    "host"
-  )}/password/reset/${resetToken}`;
+  const resetPasswordUrl = `${process.env.FRONTEND_URL}/password/reset/${resetToken}`;
 
   const message = `Your password reset token is :- \n\n ${resetPasswordUrl} \n\nIf you have not requested this email then, please ignore it.`;
 
@@ -160,7 +158,7 @@ exports.updatePassword = catchAsyncError(async (req, res, next) => {
     return next(new ErrorHandler("Old Password is Incorrect", 401));
   }
 
-  if (req.body.newPassword !== req.body.passwordConfirm) {
+  if (req.body.newPassword !== req.body.confirmPassword) {
     return next(new ErrorHandler("Password Does Not Match", 400));
   }
 
