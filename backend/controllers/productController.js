@@ -1,7 +1,7 @@
 const Product = require("../models/productModel");
 const ErrorHander = require("../utils/errorhandler");
 const catchAsyncErrors = require("../middleware/catchAsyncError");
-const ApiFeatures = require("../utils/apifeatures");
+const ApiFeatures = require("../utils/apiFeatures");
 const cloudinary = require("cloudinary");
 
 // Create Product -- Admin
