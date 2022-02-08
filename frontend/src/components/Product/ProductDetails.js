@@ -31,7 +31,7 @@ const ProductDetails = ({ match }) => {
   );
 
   const { success, error: reviewError } = useSelector(
-    (state) => state   /// to edit
+    (state) => state.newReview
   );
 
   const options = {
@@ -47,7 +47,7 @@ const ProductDetails = ({ match }) => {
   const [comment, setComment] = useState("");
 
   const increaseQuantity = () => {
-    if (product.stock <= quantity) return;
+    if (product.Stock <= quantity) return;
 
     const qty = quantity + 1;
     setQuantity(qty);
@@ -142,7 +142,7 @@ const ProductDetails = ({ match }) => {
                     <button onClick={increaseQuantity}>+</button>
                   </div>
                   <button
-                    disabled={product.stock < 1 ? true : false}
+                    disabled={product.Stock < 1 ? true : false}
                     onClick={addToCartHandler}
                   >
                     Add to Cart
@@ -151,8 +151,8 @@ const ProductDetails = ({ match }) => {
 
                 <p>
                   Status:
-                  <b className={product.stock < 1 ? "redColor" : "greenColor"}>
-                    {product.stock < 1 ? " Out Of Stock" : " In Stock"}
+                  <b className={product.Stock < 1 ? "redColor" : "greenColor"}>
+                    {product.Stock < 1 ? "OutOfStock" : "InStock"}
                   </b>
                 </p>
               </div>

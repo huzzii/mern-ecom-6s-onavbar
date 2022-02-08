@@ -27,11 +27,13 @@ router.route("/password/update").put(isAuthenticatedUser, updatePassword);
 router.route("/me/update").put(isAuthenticatedUser, updateProfile);
 router
   .route("/admin/users")
-  .get(isAuthenticatedUser, authorizeRoles("user"), getAllUser);
+  .get(isAuthenticatedUser, authorizeRoles("admin"), getAllUser);
+
 router
   .route("/admin/user/:id")
-  .get(isAuthenticatedUser, authorizeRoles("user"), getSingleUser)
-  .put(isAuthenticatedUser, authorizeRoles("user"), updateUserRole)
-  .delete(isAuthenticatedUser, authorizeRoles("user"), deleteUser);
+  .get(isAuthenticatedUser, authorizeRoles("admin"), getSingleUser)
+  .put(isAuthenticatedUser, authorizeRoles("admin"), updateUserRole)
+  .delete(isAuthenticatedUser, authorizeRoles("admin"), deleteUser);
+
 
 module.exports = router;
